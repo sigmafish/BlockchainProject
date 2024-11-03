@@ -33,7 +33,6 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 
 
 ## 3. Technology, Service, or Product
-
 ### (1) 基本定義
 
 - 資產類型:
@@ -44,8 +43,16 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 | 合約幣(contract coin) | 透過發行合約幣形成自主的商業模式 |
 | 兌換券(contract token) | 透過發行兌換券將商品/服務數位化 |
 
-- <span id="rate_def">交易類型與收益:</span>
-系統會依據節點收錄進區塊的交易類型發放相應的獎勵，初始定義如下表，目的是鼓勵節點對特定交易類型的處理，系統會視目前交易池中各類型的比例做調整。
+- 帳戶類型:
+
+| 名稱 | 功能 | 相關操作 |
+|:----:|:--------:|:--------:|
+| 一般帳戶 | 儲存私有資產，如 currency coin 及 contract token | 資產所有權轉換 |
+| 合約帳戶 | 暫存私有資產 | 質押、寄賣等 |
+> [註] currency coin 為 VFlow coin 和 contract coin 的通稱
+
+- <span id="rate_def">交易類型與收益:</span><br>
+系統會依據節點收錄進區塊的交易類型發放相應的獎勵，初始定義如下表，目的是鼓勵節點對特定交易類型的處理，系統會視目前交易池和寄賣池中各類型的比例做調整。
  
 | 交易類型  | 基本獎勵(單位:UC) | 附加獎勵 | 相關邏輯 |
 | :--------: | :--------: | :--------: | :--------: |
@@ -60,6 +67,7 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 ###  <span id="sec3-2">(2) 物件結構</span> 
 ```c++=
 #include <string> 
+#include <map>
 using namespace std; 
 
 //持有者資訊
@@ -206,7 +214,7 @@ void invest(OwnerInfo supporter, float contract_coin_amount);
 string get_contract_info();
 
 /* 延長合約:
-    1. 檢查 
+    1. 檢查: 
        (1) is_available 是否為 true
        (2) creator.address 是否為 creator_address
     2. 當 1.(1) & 1.(2) 為 true 時, 執行步驟 3~4
@@ -219,7 +227,7 @@ string get_contract_info();
 void extend(OwnerInfo creator, int new_add_period);
 
 /* 結束合約:
-    1. 檢查 
+    1. 檢查: 
        (1) is_available 是否為 false
        (2) creator.address 是否為 creator_address
     2. 當 1.(1) & 1.(2) 為 true 時, 執行步驟 3~4
@@ -246,7 +254,7 @@ string creator_address; // 記錄 creator 的 address
 string deposit_address; // 質押 VFlow coin 的 address
 string token_name;      // contract token 的名稱
 /* currency_price_maps 為不同 currency 的購買數量與單價的對應表, 
-ex. 以不同 currency 購買 1/5/10 個 contract token 對應的單價
+ex. 以不同 currency 購買 1/5/10 個 contract token 對應的單價(理論上買越多越便宜)
  { 
     {"VFlow", { 1., { {1, 1.},{5, 1.},{10, 0.8} } } },   //用 VFlow coin
     {"ACoin": { 0.9, { {1, 0.9},{5, 0.8},{10, 0.7} } } } //用 ACoin 
@@ -296,7 +304,7 @@ bool is_contract_available();
        取得對應的 currency coin
    Inputs: 
      - OwnerInfo buyer: buyer 的個人資訊
-     - string currency: 預計用來購買 token 的 coin name
+     - string currency: 預計用來購買 token 的 currency 的 name
      - TokenInfo token_info: buyer 預計購買的 contract token 資訊
 */
 void purchase(OwnerInfo buyer, string currency, TokenInfo token_info);
@@ -412,7 +420,7 @@ void franchise(OwnerInfo creator, CurrencyTokenInfo currency_token_info);
 string get_contract_info();
 
 /* 延長合約:
-    1. 檢查 
+    1. 檢查: 
        (1) is_available 是否為 true
        (2) creator.address 是否為 creator_address
     2. 當 1.(1) & 1.(2) 為 true 時, 執行步驟 3~4
@@ -425,7 +433,7 @@ string get_contract_info();
 void extend(OwnerInfo creator, int new_add_period);
 
 /* 結束合約:
-    1. 檢查 
+    1. 檢查: 
        (1) is_available 是否為 false
        (2) creator.address 是否為 creator_address
     2. 當 1.(1) & 1.(2) 為 true 時, 執行步驟 3~4
@@ -439,22 +447,28 @@ void close(OwnerInfo creator);
 
 ###  <span id="sec3-5">(5) 交換兌換券的智能合約</span>
 - 各種 token 的持有者都能透過寄賣池(consignment pool)，交易 token
-- 節點經手的寄賣(consign)和搓合(matching)的交易，若最終得到確認上鏈，皆可以根據 <a href="#rate_def" style="display:inline;color:var(--hmd-tw-text-default);">「3.(1) 交易類型與收益」</a> 的定義，獲得 VFlow coin 的報酬
+- 透過交易彼此手上以較低成本(與購買數量有關)入手的 token，讓眾人都能享受到優惠的價格
+- 節點經手的寄賣(consign)和搓合(matching)的交易，若最終得到確認上鏈，皆可以根據 <a href="#rate_def" style="display:inline;color:var(--hmd-tw-text-default);">「3.(1) 交易類型與收益」</a> 的定義，獲得 VFlow coin 作為報酬
 ```c++=
 #include <string> 
+#include <set>
 #include <time.h>
 using namespace std; 
 
 string consignment_address; // 寄賣的 address
 string node_address;        // 運行智能合約節點的 address
+int list_limit;             // 過期的寄賣交易的容許筆數
+set<string> expired_transaction_list; // 過期的寄賣交易明細
 
 /* 建構子: 
     1. 產生寄賣的 address, 每個節點可以不同 
     2. 儲存節點的 address, 即 node_address := node_info.address
+    3. 設定 list_limit := _list_limit
    Inputs: 
      - OwnerInfo node_info: 運行智能合約節點的個人資訊
+     - int _list_limit: 過期的寄賣交易的容許筆數
 */
-void constructor(OwnerInfo node_info);
+void constructor(OwnerInfo node_info, int _list_limit);
 
 /* 主動交換: 
     1. 檢查: 
@@ -505,7 +519,7 @@ void matching(string transaction_id_1, string transaction_id_2);
 
 /* 取得節點寄賣資產: 回傳未過期的寄賣資產
     1. 檢查 consignment_address 寄賣的資產是否過期
-    2. 若過期, 則執行 cancel() ; 若未過期, 則加入 outputs 清單中
+    2. 若過期, 則加入 expired_transaction_list 中 ; 若未過期, 則加入 outputs 清單中
    Inputs: 
      - string token_name: 搜尋特定 token(如果有)
      - int order_amount: 回傳筆數(如果有)
@@ -528,14 +542,16 @@ string get_consignment_info(string token_name, int order_amount);
 void cancel(OwnerInfo owner, string transaction_list[]);
 
 /* 取消寄賣: 被動, 當節點發現寄賣的 tokens 過期時呼叫
-    1. 檢查 node.address 是否為 node_address 
-    2. 當 1 為 true 時, 轉換 transaction_list 中每筆 transaction 的資產所有權, 
-       即 consignor 取得 consignment_address 寄賣的 token 的所有權
+    1. 檢查: 
+        (1) node.address 是否為 node_address 
+        (2) expired_transaction_list.size() >= list_limit
+    2. 當 1.(1) & 1.(2) 為 true 時, 轉換 expired_transaction_list 中每筆 
+       transaction 的資產所有權, 即 consignor 取得 consignment_address 寄賣的 
+       token 的所有權
    Inputs: 
      - OwnerInfo node: node 的個人資訊
-     - string expired_transaction_list[]: 過期的寄賣交易明細
 */
-void cancel(OwnerInfo node, string expired_transaction_list[]);
+void cancel(OwnerInfo node);
 
 /* 取得寄賣收入: 
     1. 檢查 node.address 是否為 node_address 
