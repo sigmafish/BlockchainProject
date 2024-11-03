@@ -189,7 +189,7 @@ void refund(OwnerInfo buyer, float contract_coin_amount);
 */
 void increase(OwnerInfo creator, float contract_coin_amount);
 
-/* 投資: 配合線下簽訂的具商業機密的實體合約使用
+/* 投資: 回補 contract coin, 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) supporter.address 中是否有足夠的 contract coin 
@@ -382,7 +382,7 @@ void refund(OwnerInfo buyer, string transaction_list[], int amount);
 */
 void increase(OwnerInfo creator, int contract_token_amount);
 
-/* 投資: 配合線下簽訂的具商業機密的實體合約使用
+/* 投資: 回補 contract token, 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) supporter.address 中是否有足夠的 contract token 
