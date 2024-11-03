@@ -132,7 +132,16 @@ bool is_available;      // 合約是否有效
 */
 void constructor(OwnerInfo creator, float guaranty_coin_amount, CurrencyInfo currency_info, int period);
 
-/* 換匯(public): 
+/* 檢查合約狀態:
+    1. 檢查合約是否到期: 
+       (1) is_available 是否為 true
+       (2) end_time 是否為過去的時間 
+    2. 當 1.(1) & 1.(2) 為 true 時, 設定 is_available 為 false
+   Outputs: bool true/false
+*/
+bool is_contract_available();
+
+/* 換匯: 
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) buyer.address 中是否有足夠的 VFlow coin 
@@ -146,7 +155,7 @@ void constructor(OwnerInfo creator, float guaranty_coin_amount, CurrencyInfo cur
 */
 void exchange(OwnerInfo buyer, float vflow_coin_amount, float contract_coin_amount);
 
-/* 退款(public): 
+/* 退款: 
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) buyer.address 中是否有足夠的 contract coin 
@@ -159,7 +168,7 @@ void exchange(OwnerInfo buyer, float vflow_coin_amount, float contract_coin_amou
 */
 void refund(OwnerInfo buyer, float contract_coin_amount);
 
-/* 增資(public): 
+/* 增資: 
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) creator.address 是否為 creator_address
@@ -172,7 +181,7 @@ void refund(OwnerInfo buyer, float contract_coin_amount);
 */
 void increase(OwnerInfo creator, float contract_coin_amount);
 
-/* 投資(public): 配合線下簽訂的具商業機密的實體合約使用
+/* 投資: 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) supporter.address 中是否有足夠的 contract coin 
@@ -184,16 +193,7 @@ void increase(OwnerInfo creator, float contract_coin_amount);
 */
 void invest(OwnerInfo supporter, float contract_coin_amount);
 
-/* 檢查合約狀態(public):
-    1. 檢查合約是否到期: 
-       (1) is_available 是否為 true
-       (2) end_time 是否為過去的時間 
-    2. 當 1.(1) & 1.(2) 為 true 時, 執行 close() 結束合約
-   Outputs: bool true/false
-*/
-bool is_contract_available();
-
-/* 取得合約狀態(public):
+/* 取得合約狀態:
    Outputs: (JSON string){
                (bool)is_available,
                (string)coin_name,
@@ -219,8 +219,10 @@ string get_contract_info();
 void extend(OwnerInfo creator, int new_add_period);
 
 /* 結束合約:
-    1. 檢查 creator.address 是否為 creator_address, 若是, 則執行步驟 2~4
-    2. 設定 is_available 為 false
+    1. 檢查 
+       (1) is_available 是否為 false
+       (2) creator.address 是否為 creator_address
+    2. 當 1.(1) & 1.(2) 為 true 時, 執行步驟 3~4
     3. 返回 creator 質押的 VFlow coin, 即 creator_address 取得 deposit_address 的 VFlow coin
     4. 將結束的訊息廣播全網
    Inputs: 
@@ -274,7 +276,16 @@ bool is_available;      // 合約是否有效
 */
 void constructor(OwnerInfo creator, float guaranty_coin_amount, TokenInfo token_info, int period);
 
-/* 購買(public): 
+/* 檢查合約狀態:
+    1. 檢查合約是否到期: 
+       (1) is_available 是否為 true
+       (2) end_time 是否為過去的時間 
+    2. 當 1.(1) & 1.(2) 為 true 時, 設定 is_available 為 false
+   Outputs: bool true/false
+*/
+bool is_contract_available();
+
+/* 購買: 
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) currency 及 token_info.amount 是否在 currency_price_maps 中被定義
@@ -290,7 +301,7 @@ void constructor(OwnerInfo creator, float guaranty_coin_amount, TokenInfo token_
 */
 void purchase(OwnerInfo buyer, string currency, TokenInfo token_info);
 
-/* 消費(public): 透過 currency coin
+/* 消費: 透過 currency coin
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) consumer.address 中是否有足夠的 currency coin
@@ -303,7 +314,7 @@ void purchase(OwnerInfo buyer, string currency, TokenInfo token_info);
 */
 void consume(OwnerInfo consumer, OwnerInfo producer, CurrencyInfo currency_info);
 
-/* 消費(public): 透過 contract token
+/* 消費: 透過 contract token
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) consumer.address 中是否有足夠的 contract token
@@ -316,7 +327,7 @@ void consume(OwnerInfo consumer, OwnerInfo producer, CurrencyInfo currency_info)
 */
 void consume(OwnerInfo consumer, OwnerInfo producer, TokenInfo token_info);
 
-/* 退款(public): 單筆
+/* 退款: 單筆
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) buyer.address 中是否有 contract token 
@@ -332,7 +343,7 @@ void consume(OwnerInfo consumer, OwnerInfo producer, TokenInfo token_info);
 */
 void refund(OwnerInfo buyer, int amount);
 
-/* 退款(public): 憑單
+/* 退款: 憑單
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) buyer.address 中是否有剩餘的 contract token 
@@ -349,7 +360,7 @@ void refund(OwnerInfo buyer, int amount);
 */
 void refund(OwnerInfo buyer, string transaction_list[], int amount);
 
-/* 增資(public): 
+/* 增資: 
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) creator.address 是否為 creator_address
@@ -363,7 +374,7 @@ void refund(OwnerInfo buyer, string transaction_list[], int amount);
 */
 void increase(OwnerInfo creator, int contract_token_amount);
 
-/* 投資(public): 配合線下簽訂的具商業機密的實體合約使用
+/* 投資: 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) supporter.address 中是否有足夠的 contract token 
@@ -375,7 +386,7 @@ void increase(OwnerInfo creator, int contract_token_amount);
 */
 void invest(OwnerInfo supporter, int contract_token_amount);
 
-/* 加盟(public): 等同於新增一種支付方式, 配合線下簽訂的具商業機密的實體合約使用
+/* 加盟: 等同於新增一種支付方式, 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) creator.address 是否為 creator_address 
@@ -388,16 +399,7 @@ void invest(OwnerInfo supporter, int contract_token_amount);
 */
 void franchise(OwnerInfo creator, CurrencyTokenInfo currency_token_info);
 
-/* 檢查合約狀態(public):
-    1. 檢查合約是否到期: 
-       (1) is_available 是否為 true
-       (2) end_time 是否為過去的時間 
-    2. 當 1.(1) & 1.(2) 為 true 時, 執行 close() 結束合約
-   Outputs: bool true/false
-*/
-bool is_contract_available();
-
-/* 取得合約狀態(public):
+/* 取得合約狀態:
    Outputs: (JSON string){
                (bool)is_available,
                (string)token_name,
@@ -423,8 +425,10 @@ string get_contract_info();
 void extend(OwnerInfo creator, int new_add_period);
 
 /* 結束合約:
-    1. 檢查 creator.address 是否為 creator_address, 若是, 則執行步驟 2~4
-    2. 設定 is_available 為 false
+    1. 檢查 
+       (1) is_available 是否為 false
+       (2) creator.address 是否為 creator_address
+    2. 當 1.(1) & 1.(2) 為 true 時, 執行步驟 3~4
     3. 返回 creator 質押的 VFlow coin, 即 creator_address 取得 deposit_address 的 VFlow coin
     4. 將結束的訊息廣播全網
    Inputs: 
@@ -452,7 +456,7 @@ string node_address;        // 運行智能合約節點的 address
 */
 void constructor(OwnerInfo node_info);
 
-/* 主動交換(public): 
+/* 主動交換: 
     1. 檢查: 
        (1) owner_1.address 中是否有足夠的 token 1 
        (2) owner_2.address 中是否有足夠的 token 2 
@@ -470,7 +474,7 @@ void constructor(OwnerInfo node_info);
 */
 void exchange(OwnerInfo owner_1, TokenInfo token_info_1, OwnerInfo owner_2, TokenInfo token_info_2, CurrencyInfo difference);
 
-/* 寄賣(public): 被動交換
+/* 寄賣: 被動交換
     1. 檢查 consignor.address 中是否有足夠的 token
     2. 當 1 為 true 時, 轉換資產所有權, 即 consignment_address 在寄賣期間取得 
        consignor 的 token 的所有權
@@ -482,7 +486,7 @@ void exchange(OwnerInfo owner_1, TokenInfo token_info_1, OwnerInfo owner_2, Toke
 */
 void consign(OwnerInfo consignor, TokenInfo token_info, CurrencyInfo difference, int period);
 
-/* 搓合(public): 
+/* 搓合: 
     1. 檢查:
         (1) transaction_id_1 中的資產所有權是否還未轉換
         (2) transaction_id_2 中的資產所有權是否還未轉換
@@ -499,7 +503,7 @@ void consign(OwnerInfo consignor, TokenInfo token_info, CurrencyInfo difference,
 */
 void matching(string transaction_id_1, string transaction_id_2);
 
-/* 取得節點寄賣資產(public): 回傳未過期的寄賣資產
+/* 取得節點寄賣資產: 回傳未過期的寄賣資產
     1. 檢查 consignment_address 寄賣的資產是否過期
     2. 若過期, 則執行 cancel() ; 若未過期, 則加入 outputs 清單中
    Inputs: 
@@ -512,7 +516,7 @@ void matching(string transaction_id_1, string transaction_id_2);
 */
 string get_consignment_info(string token_name, int order_amount);
 
-/* 取消寄賣(public): 主動, 由寄賣所有權人呼叫
+/* 取消寄賣: 主動, 由寄賣所有權人呼叫
     1. 檢查 owner.address 是否與 transaction_list 中每筆交易的 
        consignor.address 相同
     2. 若有檢查結果為 true 的 transaction, 則轉換其資產所有權, 即 consignor 取得 
