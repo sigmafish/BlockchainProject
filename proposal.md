@@ -61,8 +61,10 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 | 兌換券相關     | 1     |    | <a href="#sec3-4" style="display:inline;color:var(--hmd-tw-text-default);">3.(4)</a> |
 | 交換兌換券     | 1     | <div style="text-align: left">參與寄賣和搓合的 addresses 各可獲得 1/3 UC</div> | <a href="#sec3-5" style="display:inline;color:var(--hmd-tw-text-default);">3.(5)</a> |
  
-> [註1] 1 Unit coin(UC) $\equiv \frac{1\text{ VFlow coin}}{1000\text{ transactions}}$<br>
-  [註2] 依照 OurChain 原生邏輯控制 VFlow coin 的總數量，視情況做調整
+>  [註1] 基本獎勵($y$)的計算公式為 $y=1+\sqrt{\text{max}\{0, x- \frac{1}{4}\}}$，$x$ 為交易類型佔交易池的比例 <br> 
+   [註2] 1 Unit coin(UC) $\equiv \frac{1\text{ VFlow coin}}{1000\text{ transactions}}$<br>
+  [註3] 依照 OurChain 原生邏輯控制 VFlow coin 的總數量，視情況做調整<br>
+  [註4] 1/3 UC 是名目發放的獎勵，實際發放為 16 位小數位數的 0.3333333333333333 UC
 
 ###  <span id="sec3-2">(2) 物件結構</span> 
 ```c++=
@@ -403,7 +405,7 @@ void invest(OwnerInfo supporter, int contract_token_amount);
        currency_price_maps["VFlow"].amount_price_map[1] 的值
    Inputs: 
      - OwnerInfo creator: creator 的個人資訊
-     - CurrencyTokenInfo currency_token_info: 
+     - CurrencyTokenInfo currency_token_info: 以 currency coin 定義的物價對應資訊
 */
 void franchise(OwnerInfo creator, CurrencyTokenInfo currency_token_info);
 
@@ -494,11 +496,12 @@ void exchange(OwnerInfo owner_1, TokenInfo token_info_1, OwnerInfo owner_2, Toke
        consignor 的 token 的所有權
    Inputs: 
      - OwnerInfo consignor: consignor 的個人資訊
-     - TokenInfo token_info: consignor 寄賣的 token 資訊
+     - TokenInfo token_traded_out: consignor 寄賣的 token 資訊
+     - TokenInfo token_traded_in: consignor 預計換取的 token 資訊
      - CurrencyInfo difference: consignor 要補給對方的差價(如果有)
      - int period: 寄賣期間, 以天為最小單位
 */
-void consign(OwnerInfo consignor, TokenInfo token_info, CurrencyInfo difference, int period);
+void consign(OwnerInfo consignor, TokenInfo token_traded_out, TokenInfo token_traded_in, CurrencyInfo difference, int period);
 
 /* 搓合: 
     1. 檢查:
@@ -531,10 +534,11 @@ void matching(string transaction_id_1, string transaction_id_2);
 string get_consignment_info(string token_name, int order_amount);
 
 /* 取消寄賣: 主動, 由寄賣所有權人呼叫
-    1. 檢查 owner.address 是否與 transaction_list 中每筆交易的 
-       consignor.address 相同
-    2. 若有檢查結果為 true 的 transaction, 則轉換其資產所有權, 即 consignor 取得 
-       consignment_address 寄賣的 token 的所有權
+    1. 檢查:
+        (1) owner.address 是否與 transaction_list 中每筆交易的 consignor.address 相同
+        (2) consignment_address 是否還有 transaction_list 中每筆交易的 token 的所有權
+    2. 若有 1.(1) & 1.(2) 的檢查結果為 true 的 transaction, 則轉換其資產所有權, 
+       即 consignor 取得 consignment_address 寄賣的 token 的所有權
    Inputs: 
      - OwnerInfo owner: owner 的個人資訊
      - string transaction_list[]: 寄賣交易明細
@@ -563,6 +567,72 @@ void cancel(OwnerInfo node);
 void withdraw(OwnerInfo node);
 ```
 
+###  <span id="sec3-6">(6) 發佈專案的智能合約</span>
+- 使用者可以透過此智能合約進行專案募資或營運專案服務
+- 質押品可為無質押、currency coin 或 contract token
+```c++=
+#include <string>
+#include <time.h>
+using namespace std; 
+
+int project_stages; // 預期專案總階段
+int current_stage;  // 目前專案階段
+string current_project; // 目前執行的專案名稱
+string funds_address; // 基金的 address
+string feedback_address; // 回報 token 的 address
+int funds[project_stages]; // 不同階段的基金
+
+/*
+    設定 current_stage:= 0
+        current_stage := _current_project
+        project_stages := _project_stages
+        funds_address
+        funds[project_stages] := {0}
+*/
+void constructor(OwnerInfo creator, int _project_stages, string _current_project, TokenInfo guaranty_token);
+
+/* 投資: 無 token 回報, 配合線下簽訂的具商業機密的實體合約使用
+    
+*/
+void invest();
+
+/* 募資: 以 token 作為回報
+
+*/
+void fundraise();
+
+/* 提交階段工作(case by case):  
+
+   sample 1: 募資開咖啡廳
+   sample 2: 程式專案開發
+*/
+void submit_work();
+
+/* 審核階段工作(case by case): 
+    review 成功, 
+    funds[current_stage + 1] := funds[current_stage] + funds[current_stage + 1]; 
+    current_stage := current_stage + 1;
+   
+   sample 1: 募資開咖啡廳
+   sample 2: 程式專案開發
+*/
+void review_work();
+
+/* 退場: 
+
+*/
+void exit();
+
+/* 取得專案狀態:
+   Outputs: (JSON string){
+            }
+*/
+string get_project_info();
+
+*/
+void close();
+```
+
 ## 4. What makes this system superior, or better than current alternatives, or competitors?
 
 - 提供退款保障確保消費者權益，可避免出現如 <a href="#cama" style="display:inline;color:var(--hmd-tw-text-default);">Reference 1</a> 的消費爭議，導致私有資產蒙受損失
@@ -573,10 +643,11 @@ void withdraw(OwnerInfo node);
 ## 5. Expected outcomes
 
 - 透過活化被過度囤積的實體貨幣並賦予虛擬幣交易特性等操作，增加實體資源的交易效率，進而改善經濟環境
-- 藉由區塊鏈開闢一個相對自由競爭的市場，使財富分配能夠被後繼有能者參與，減緩財富分配不均導致的政治及社會問題
+- 藉由區塊鏈保障私有資產和提供一個相對自由競爭的市場，將有機會使得財富分配能夠被後繼有能者參與，減緩財富分配不均導致的政治及社會問題
 
 ## References
 <a id="cama" href="https://www.ctwant.com/article/365562/" target="_blank"><span>1. cama加盟店推「咖啡寄杯優惠」半個月後突歇業！他剩362杯求償無門</span></a><br>
-<a href="https://www.books.com.tw/products/E050031639?sloc=main" target="_blank"><span>2. 實戰區塊鏈技術｜加密貨幣與密碼學, 王毅丞, 碁峰, 2021</span></a><br>
-<a href="https://www.books.com.tw/products/0010803367?sloc=main" target="_blank"><span>3. 白話區塊鏈, 蔣勇, 碁峰 2018</span></a><br>
-<a href="https://www.books.com.tw/products/CN11399011?sloc=main" target="_blank"><span>4. 區塊鏈技術指南, 鄒均, 機械工業, 2016</span></a>
+<a id="nobel-enc-2024" href="https://global.udn.com/global_vision/story/8663/8292959"><span>2. 國家為何失敗？世界為何不平等？2024諾貝爾經濟學獎的當代啟示</span></a><br>
+<a href="https://www.books.com.tw/products/E050031639?sloc=main" target="_blank"><span>3. 實戰區塊鏈技術｜加密貨幣與密碼學, 王毅丞, 碁峰, 2021</span></a><br>
+<a href="https://www.books.com.tw/products/0010803367?sloc=main" target="_blank"><span>4. 白話區塊鏈, 蔣勇, 碁峰 2018</span></a><br>
+<a href="https://www.books.com.tw/products/CN11399011?sloc=main" target="_blank"><span>5. 區塊鏈技術指南, 鄒均, 機械工業, 2016</span></a>
