@@ -21,8 +21,7 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 術 -- 賽局設計與期貨思維<br>
 器 -- 區塊鏈及相關技術**
 
-## 2. Target audience
-
+## 2.  <span id="sec2">Target audience</span>
 以下是可從本區塊鏈提供的操作中，獲取利益的對象:
 
 | 對象               | 操作 | 預期利益 |
@@ -59,9 +58,10 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 | 原生幣相關     | 1     |    | OurChain 原生邏輯     |
 | 合約幣相關     | 1     |    | <a href="#sec3-3" style="display:inline;color:var(--hmd-tw-text-default);">3.(3)</a> |
 | 兌換券相關     | 1     |    | <a href="#sec3-4" style="display:inline;color:var(--hmd-tw-text-default);">3.(4)</a> |
-| 交換兌換券     | 1     | <div style="text-align: left">參與寄賣和搓合的 addresses 各可獲得 1/3 UC</div> | <a href="#sec3-5" style="display:inline;color:var(--hmd-tw-text-default);">3.(5)</a> |
+| 交換兌換券     | 1     | <div style="text-align: left">參與寄賣和搓合的 addresses 各可獲得 (float)1/3 UC</div> | <a href="#sec3-5" style="display:inline;color:var(--hmd-tw-text-default);">3.(5)</a> |
+| 資金籌措     | 1     |    | <a href="#sec3-6" style="display:inline;color:var(--hmd-tw-text-default);">3.(6)</a> |
  
->  [註1] 基本獎勵($y$)的計算公式為 $y=1+\sqrt{\text{max}\{0, x- \frac{1}{4}\}}$，$x$ 為交易類型佔交易池的比例 <br> 
+>  [註1] 暫定基本獎勵($y$)的計算公式為 $y=1+\sqrt{\text{max}\{0, x- (\text{float})\frac{2}{3}\}}$，$x$ 為交易類型佔交易池的比例 <br> 
    [註2] 1 Unit coin(UC) $\equiv \frac{1\text{ VFlow coin}}{1000\text{ transactions}}$<br>
   [註3] 依照 OurChain 原生邏輯控制 VFlow coin 的總數量，視情況做調整<br>
   [註4] 1/3 UC 是名目發放的獎勵，實際發放為 16 位小數位數的 0.3333333333333333 UC
@@ -130,7 +130,7 @@ bool is_available;      // 合約是否有效
     2. 檢查 creator.address 中是否有足夠質押的 VFlow coin, 有則啟動合約 
     3. 啟動合約後，
        (1) 將質押的 VFlow coin 轉存到 deposit_address 中
-       (2) 將產生的 contract coin 存到 creator 的 address 中
+       (2) 將產生的等量 currency_info.amount 的  contract coin 存到 creator 的 address 中
     4. 利用 guaranty_coin_amount 與 currency_info.amount 計算 exchange_rate
     5. 利用 period 計算 end_time
     6. 設定 is_available := true, coin_name := currency_info.name
@@ -252,14 +252,16 @@ void close(OwnerInfo creator);
 #include <time.h>
 using namespace std; 
 
-string creator_address; // 記錄 creator 的 address
-string deposit_address; // 質押 VFlow coin 的 address
-string token_name;      // contract token 的名稱
+float refund_rate; // 退款(refund)比例
+float total_token_value; // 記錄販售商品/服務總價值, 以 VFlow coin 計價
+string creator_address;  // 記錄 creator 的 address
+string deposit_address;  // 質押 VFlow coin 的 address
+string token_name;       // contract token 的名稱
 /* currency_price_maps 為不同 currency 的購買數量與單價的對應表, 
 ex. 以不同 currency 購買 1/5/10 個 contract token 對應的單價(理論上買越多越便宜)
  { 
     {"VFlow", { 1., { {1, 1.},{5, 1.},{10, 0.8} } } },   //用 VFlow coin
-    {"ACoin": { 0.9, { {1, 0.9},{5, 0.8},{10, 0.7} } } } //用 ACoin 
+    {"ACoin", { 0.9, { {1, 0.9},{5, 0.8},{10, 0.7} } } } //用 ACoin 
  }
 */
 map<string, CurrencyTokenInfo> currency_price_maps; 
@@ -269,22 +271,25 @@ bool is_available;      // 合約是否有效
 /* 建構子: 
     1. 檢查 creator.address 是否已有該 contract token 的所有權, 
        若是, 則根據交易找到運行節點並 call get_contract_info() 更新本地節點
-       若否, 則執行步驟 2~6
+       若否, 則執行步驟 2~8
     2. 檢查 creator.address 中是否有足夠質押的 VFlow coin, 有則啟動合約 
     3. 啟動合約後，
        (1) 將質押的 VFlow coin 轉存到 deposit_address 中
-       (2) 將產生的 contract token 存到 creator 的 address 中 
-    4. 利用 guaranty_coin_amount 與 token_info.amount 計算 
-       currency_price_maps["VFlow"].amount_price_map[1]
-    5. 利用 period 計算 end_time
-    6. 設定 is_available := true, token_name := token_info.name
+       (2) 將產生的等量 token_info.amount 的 token 存到 creator 的 address 中 
+    4. 利用 period 計算 end_time
+    5. 設定 currency_price_maps["VFlow"].amount_price_map[1] := token_basic_price
+    6. 設定 total_token_value := token_info.amount * token_basic_price
+    7. 設定 refund_rate := _refund_rate
+    8. 設定 is_available := true, token_name := token_info.name
    Inputs: 
      - OwnerInfo creator: 啟動合約的個人資訊
      - float guaranty_coin_amount: 質押 VFlow coin 的數量
      - TokenInfo token_info: 預期發行的合約代幣資訊
+     - float token_basic_price: token 以 VFlow coin 計價的單一售價
+     - float _refund_rate: 退款的比例
      - int period: 合約期間, 以天為最小單位
 */
-void constructor(OwnerInfo creator, float guaranty_coin_amount, TokenInfo token_info, int period);
+void constructor(OwnerInfo creator, float guaranty_coin_amount, TokenInfo token_info, float token_basic_price, float _refund_rate, int period);
 
 /* 檢查合約狀態:
     1. 檢查合約是否到期: 
@@ -301,9 +306,13 @@ bool is_contract_available();
        (2) currency 及 token_info.amount 是否在 currency_price_maps 中被定義
        (3) buyer.address 中是否有足夠的 currency coin 
        (4) creator_address 中是否有足夠的 contract token
-    2. 當 1.(1) & 1.(2) & 1.(3) & 1.(4) 為 true 時, 根據 currency_price_maps 中的定義
-       轉換資產所有權, 即 buyer.address 取得 contract token, creator_address 
-       取得對應的 currency coin
+    2. 當 1.(1) & 1.(2) & 1.(3) & 1.(4) 為 true 時, 根據 currency_price_maps 
+       中的定義計算本筆交易的價值
+    3. 檢查 deposit_address 中的 VFlow coin 是否大於或等於 total_token_value 
+    4. 轉換資產所有權, 即 buyer.address 取得 contract token, 
+       (1) 若 3 為 true, creator_address 取得對應的 currency coin
+       (2) 若 3 為 false, deposit_address 取得等價的 VFlow coin
+           [當 currency coin 非 VFlow coin 時, 使用 currency_price_maps 轉換]
    Inputs: 
      - OwnerInfo buyer: buyer 的個人資訊
      - string currency: 預計用來購買 token 的 currency 的 name
@@ -341,12 +350,13 @@ void consume(OwnerInfo consumer, OwnerInfo producer, TokenInfo token_info);
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) buyer.address 中是否有 contract token 
-       (3) deposit_address 中是否有足夠的 VFlow coin
-    2. 當 1.(1) & 1.(2) & 1.(3) 為 true 時, 以 
+       (3) 該 token 不是透過募資(fundraise)取得的
+       (4) deposit_address 中是否有足夠的 VFlow coin
+    2. 當 1.(1) & 1.(2) & 1.(3) & 1.(4) 為 true 時, 以 
        currency_price_maps["VFlow"].amount_price_map[1] 為單價計算退款, 
        直到退貨數 = min{amount, buyer.address 中 token 數量} 為止  
-    3. 轉換資產所有權, 即 buyer.address 取得 VFlow coin(退款), creator_address 
-       取得對應的 contract token
+    3. 轉換資產所有權, 即 buyer.address 取得 VFlow coin(總退款值 * refund_rate), 
+       creator_address 取得對應的 contract token
    Inputs: 
      - OwnerInfo buyer: buyer 的個人資訊
      - int amount: buyer 欲退貨數量
@@ -361,8 +371,8 @@ void refund(OwnerInfo buyer, int amount);
     2. 當 1.(1) & 1.(2) & 1.(3) 為 true 時, 根據 transaction_list 取得每筆交易的 
        token_info 及對應 currency_price_maps 的購買單價(轉換為 VFlow 計價), 
        從單價高的開始計算退款, 直到退貨數 = min{amount, buyer.address 中 token 數量} 為止  
-    3. 轉換資產所有權, 即 buyer.address 取得 VFlow coin(退款), creator_address 
-       取得對應的 contract token
+    3. 轉換資產所有權, 即 buyer.address 取得 VFlow coin(總退款值 * refund_rate), 
+       creator_address 取得對應的 contract token
    Inputs: 
      - OwnerInfo buyer: buyer 的個人資訊
      - string transaction_list[]: buyer 的購買明細
@@ -373,11 +383,14 @@ void refund(OwnerInfo buyer, string transaction_list[], int amount);
 /* 增資: 
     1. 檢查: 
        (1) 執行 is_contract_available()
-       (2) creator.address 是否為 creator_address
-       (3) creator.address 中是否有足夠的 VFlow coin 
-    2. 當 1.(1) & 1.(2) & 1.(3) 為 true 時, 啟動增資轉換資產所有權, 即 creator.address 
-       取得 contract token, deposit_address 取得以單價
+       (2) deposit_address 中的 VFlow coin 是否大於或等於 total_token_value
+       (3) creator.address 是否為 creator_address
+       (4) creator.address 中是否有足夠的 VFlow coin 
+    2. 當 1.(1) & 1.(2) & 1.(3) & 1.(4) 為 true 時, 啟動增資轉換資產所有權, 
+       即 creator.address 取得 contract token, deposit_address 取得以單價
        currency_price_maps["VFlow"].amount_price_map[1] 計算的 VFlow coin
+    3. 更新 total_token_value := total_token_value + contract_token_amount * 
+                                 currency_price_maps["VFlow"].amount_price_map[1]  
    Inputs: 
      - OwnerInfo creator: creator 的個人資訊
      - int contract_token_amount: creator 預計增資的 contract token 的數量
@@ -403,6 +416,8 @@ void invest(OwnerInfo supporter, int contract_token_amount);
     2. 當 1.(1) & 1.(2) 為 true 時, 根據 currency_token_info 擴充或更新 
        currency_price_maps, 但無法變更
        currency_price_maps["VFlow"].amount_price_map[1] 的值
+    3. node 必須重新檢驗 currency_token_info 中的 exchange_rate 才能設定到 
+       currency_price_maps 中
    Inputs: 
      - OwnerInfo creator: creator 的個人資訊
      - CurrencyTokenInfo currency_token_info: 以 currency coin 定義的物價對應資訊
@@ -413,6 +428,8 @@ void franchise(OwnerInfo creator, CurrencyTokenInfo currency_token_info);
    Outputs: (JSON string){
                (bool)is_available,
                (string)token_name,
+               (float)total_token_value,
+               (float)refund_rate,
                (float)deposit_address 的 VFlow coin amount, 
                (float)creator_address 的 contract token amount,
                (JSON string)currency_price_maps,
@@ -567,70 +584,87 @@ void cancel(OwnerInfo node);
 void withdraw(OwnerInfo node);
 ```
 
-###  <span id="sec3-6">(6) 發佈專案的智能合約</span>
-- 使用者可以透過此智能合約進行專案募資或營運專案服務
-- 質押品可為無質押、currency coin 或 contract token
+###  <span id="sec3-6">(6) 資金籌措的智能合約</span>
+- 使用者可以透過此智能合約進行專案籌資(fundraise/invest)，營運 contract token 的商品/服務
+- 參與本區塊鏈的初期開發團隊可透過結合 (5) 及 (6) 兩種智能合約，開啟募資並提供系統更新、技術及法規諮詢、客製化開發及系統架設等服務，從 <a href="#sec2" style="display:inline;color:var(--hmd-tw-text-default);">「2. Target audience」</a> 所定義的對象處取得對應的收益
 ```c++=
 #include <string>
 #include <time.h>
 using namespace std; 
 
-int project_stages; // 預期專案總階段
-int current_stage;  // 目前專案階段
-string current_project; // 目前執行的專案名稱
-string funds_address; // 基金的 address
-string feedback_address; // 回報 token 的 address
-int funds[project_stages]; // 不同階段的基金
+float basic_investment_amount; // 基礎投資額, 以 VFlow 計價
+float return_rate;       // 投資回報率
+int return_token_amount; // 募資回報 token 數
+int active_period;       // 投資期間, 投資人只能於運行結束後才能提領本金與報酬
+string creator_address;  // 記錄 creator 的 address
+string deposit_address;  // 記錄 contract token 的 deposit address
 
-/*
-    設定 current_stage:= 0
-        current_stage := _current_project
-        project_stages := _project_stages
-        funds_address
-        funds[project_stages] := {0}
+/* 建構子: 
+    1. 檢查 token_transaction_id 的 creator 的 address 是否為目前 creator 所有, 
+       若是則執行步驟 2~8
+    2. 設定 creator_address := 發行 token 的 transaction 上記錄的 creator 的 address
+    3. 設定 deposit_address := 發行 token 的 transaction 上記錄的 deposit_address
+    4. 設定 basic_investment_amount := _basic_investment_amount
+    5. 設定 return_rate := _return_rate
+    6. 設定 return_token_amount := _return_token_amount
+    7. 設定 active_period := _active_period
+   Inputs: 
+     - OwnerInfo node_info: 運行智能合約節點的個人資訊
+     - string token_transaction_id: creator 發行 token 時的第一筆交易 id, 
+                                    即由該 constructor 建立的 transaction 的 id
+     - float _basic_investment_amount: 基礎投資額
+     - float _return_rate: creator 承諾的投資回報率
+     - int _return_token_amount: 承諾的募資回報 token 數
+     - int _active_period: 投資期間, 以天為最小單位
 */
-void constructor(OwnerInfo creator, int _project_stages, string _current_project, TokenInfo guaranty_token);
+void constructor(OwnerInfo creator, string token_transaction_id, float _basic_investment_amount, float _return_rate, int _return_token_amount, int _active_period);
 
-/* 投資: 無 token 回報, 配合線下簽訂的具商業機密的實體合約使用
-    
+/* 募資: 以 token 作為回報, 只能透過 matching 釋出, 無法使用 refund 功能
+    1. 計算投資額(investment_amount) := investment_unit * basic_investment_amount
+    2. 檢查:
+       (1) 該 contract token 的智能合約是否為有效(available)
+       (2) creator_address 中是否有足夠 return_token_amount 的 token
+       (3) supporter.address 中是否有足夠投資額的 VFlow coin
+    3. 當 2.(1) & 2.(2) & 2.(3) 為 true 時, 轉換資產所有權, 即 deposit_address 取得 
+       supporter.address 的 VFlow coin, supporter.address 從 creator_address 
+       取得等量 return_token_amount 的 token
+   Inputs: 
+     - OwnerInfo supporter: supporter 的個人資訊
+     - int investment_unit: supporter 預計投資單位數
 */
-void invest();
+void fundraise(OwnerInfo supporter, int investment_unit);
 
-/* 募資: 以 token 作為回報
-
+/* 投資: 以 return rate 作為回報
+    1. 計算投資額(investment_amount) := investment_unit * basic_investment_amount
+    2. 計算 return_value := 投資額 * (1 + return_rate)
+    3. 檢查:
+       (1) 該 contract token 的智能合約是否為有效(available)
+       (2) deposit_address + creator_address 擁有的 VFlow coin 總量是否大於或等於 return_value
+       (3) supporter.address 中是否有足夠投資額的 VFlow coin
+       當 (1) & (2) & (3) 為 true 時, 執行步驟 4~6
+    4. 計算 end_date := today + active_period
+    5. 轉換資產所有權, 即 deposit_address 取得 supporter.address 的 VFlow coin 
+    6. 將 return_rate、return_value、end_date 也一併記錄在 transaction 中
+   Inputs: 
+     - OwnerInfo supporter: supporter 的個人資訊
+     - int investment_unit: supporter 預計投資單位數
 */
-void fundraise();
+void invest(OwnerInfo supporter, int investment_unit);
 
-/* 提交階段工作(case by case):  
-
-   sample 1: 募資開咖啡廳
-   sample 2: 程式專案開發
+/* 退場: 只有 invest 產生的 transaction 才能使用
+    1. 檢查:
+       (1) transaction_list 中每筆交易是否為 invest 產生的 transaction
+       (2) 該筆 transaction 記錄的 end_date 是否大於 today
+       (3) deposit_address + creator_address 擁有的 VFlow coin 總量是否大於或等於, 
+           單筆 transaction 中的 return_value
+    2. 當一筆 transaction 滿足 1.(1) & 1.(2) & 1.(3) 為 true 時, 執行步驟 3
+    3. 轉換資產所有權, 即 investor.address 依次從 deposit_address, creator_address 
+       取得等量 return_value 的 VFlow coin
+   Inputs: 
+     - OwnerInfo investor: investor 的個人資訊
+     - string transaction_list[]: 投資的交易明細
 */
-void submit_work();
-
-/* 審核階段工作(case by case): 
-    review 成功, 
-    funds[current_stage + 1] := funds[current_stage] + funds[current_stage + 1]; 
-    current_stage := current_stage + 1;
-   
-   sample 1: 募資開咖啡廳
-   sample 2: 程式專案開發
-*/
-void review_work();
-
-/* 退場: 
-
-*/
-void exit();
-
-/* 取得專案狀態:
-   Outputs: (JSON string){
-            }
-*/
-string get_project_info();
-
-*/
-void close();
+void exit(OwnerInfo investor, string transaction_list[]);
 ```
 
 ## 4. What makes this system superior, or better than current alternatives, or competitors?
