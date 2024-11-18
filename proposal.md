@@ -30,7 +30,6 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 | 消費者             | <div style="text-align: left">1.購買商品/服務兌換券<br>2.交換商品/服務兌換券</div> | <div style="text-align: left">1.保存購買力(抗通膨)<br>2.降低購買成本(接近成本價)<br>3.獲得交易流通性</div> |
 | 政策制定者     | 取得公開資料 | <div style="text-align: left">1.稅收評估的依據<br>2.政策研擬的參考</div>  |
 
-
 ## 3. Technology, Service, or Product
 ### (1) 基本定義
 
@@ -609,7 +608,7 @@ string deposit_address;  // 記錄 contract token 的 deposit address
     6. 設定 return_token_amount := _return_token_amount
     7. 設定 active_period := _active_period
    Inputs: 
-     - OwnerInfo node_info: 運行智能合約節點的個人資訊
+     - OwnerInfo creator: 啟動合約的個人資訊
      - string token_transaction_id: creator 發行 token 時的第一筆交易 id, 
                                     即由該 constructor 建立的 transaction 的 id
      - float _basic_investment_amount: 基礎投資額
@@ -667,21 +666,58 @@ void invest(OwnerInfo supporter, int investment_unit);
 void exit(OwnerInfo investor, string transaction_list[]);
 ```
 
-## 4. What makes this system superior, or better than current alternatives, or competitors?
+## 4. Business model (商業模型)
+| 關鍵要素 | 詳情 |
+|:----:|:----:|
+| **客戶細分** |<div style="text-align: left">- **生產者**：可以發行合約幣、商品/服務兌換券。預期收益包括需求預估（成本控制）、獲取競爭購買力（稀缺資源）的途徑以及獲得投資本金（風險轉移）。<br> - **消費者**：能夠購買和交換商品/服務兌換券。預期好處是保存購買力（抗通脹）、降低購買成本（接近成本價）以及獲得交易流通性。<br> - **政策制定者**：可以獲取公開數據，用作稅收評估和政策制定的依據。</div> |
+| **價值主張** | <div style="text-align: left">- **對生產者而言**：通過發行合約幣等方式提供一種新的商業運營模式，能夠更好地控製成本、獲取投資並參與市場資源競爭。<br> - **對消費者而言**：保障購買力，使其能以更低成本獲得商品和服務，並享受交易流通性，以此應對通脹風險。<br> - **對政策制定者而言**：公開數據可輔助進行稅收評估和政策制定，使政策更貼合實際經濟情況。</div> |
+| **渠道** | <div style="text-align: left">- **區塊鏈平台**：作為整個系統的基礎設施，通過智能合約實現諸如發行合約幣、兌換券以及開展交易、籌資等各種交易和操作。不同類型的智能合約（用於發行合約幣、發行兌換券、交換兌換券、籌資等）為用戶提供多樣化的操作渠道，以滿足不同需求。<br> - **線上節點**：參與交易處理的節點在整個系統中起著關鍵作用，負責驗證、記錄交易，並根據交易類型獲得相應獎勵，以此激勵節點積極參與系統運營，確保系統順暢運行。</div> |
+| **客戶關係** | <div style="text-align: left">- **基於智能合約的保障**：智能合約在各種交易活動（如發行、購買、交換、退款、增資、投資等）中為生產者和消費者提供規則和保障，明確各方權益和操作流程，增強用戶對系統的信任。<br> - **數據共享與政策關聯（針對政策制定者）**：通過提供公開數據，與政策制定者建立起間接的合作關係，使其能夠利用這些數據開展政策相關工作，實現一定程度的互利共贏。</div> |
+| **收入來源** | <div style="text-align: left">- **交易獎勵**：系統根據節點收錄進區塊的交易類型發放相應獎勵，不同交易類型有不同的獎勵機制（如與原生幣相關、合約幣相關、兌換券相關等交易類型）。獎勵以VFlow幣為基礎進行計算和發放，激勵節點積極處理各類交易，這是系統維持運營和激勵參與者的一種重要收入分配方式。<br> - **潛在增值收益（針對生產者和投資者）**：若市場表現良好，生產者通過發行合約幣、兌換券等操作可能獲得資產增值帶來的收益；參與籌資等活動的投資者也有望根據投資回報機制獲得相應的增值收益。</div> |
+| **關鍵資源** | <div style="text-align: left">- **區塊鏈技術及相關設施**：包括區塊鏈自身架構、智能合約技術等，是實現整個商業模式的核心技術基礎，確保交易記錄、驗證、執行等功能得以實現。<br> - **VFlow幣及其他虛擬資產**：作為系統內的原生幣以及各類合約幣、兌換券等虛擬資產，是交易的媒介和價值承載物，其穩定運行和價值認可對系統至關重要。<br> - **專業的開發與運營團隊**：負責系統的開發、維護、升級以及智能合約的編寫和管理等工作，確保系統能持續適應市場需求和技術發展。</div> |
+| **關鍵活動** | <div style="text-align: left">- **系統開發與維護**：不斷完善區塊鏈系統的功能，優化智能合約的性能，確保系統的穩定性、安全性和可擴展性，以滿足不斷增長的用戶需求和日益複雜的交易場景。<br> - **交易處理與監管**：節點負責處理各類交易，包括驗證交易的真實性、合法性，將交易信息記錄到區塊鏈上，同時對交易活動進行監管，防止欺詐、違規等行為發生。<br> - **市場推廣與用戶教育**：向生產者、消費者、政策制定者等目標客戶群體宣傳推廣該系統的優勢和使用方法，提高系統的知名度和用戶參與度，同時對用戶進行必要的教育，使其能夠正確理解和運用系統的各項功能。</div> |
+| **關鍵合作夥伴** | <div style="text-align: left">- **硬件供應商（可能涉及）**：為系統運行提供必要的硬件支持，如服務器等設備，確保系統能夠穩定運行，處理大量的交易數據。<br> - **相關行業機構（可能涉及）**：與金融、商業等相關行業的機構建立合作關係，有助於推廣系統的應用，拓展業務範圍，同時獲取行業最新動態和需求信息，以便更好地優化系統。</div> |
+| **成本結構** | <div style="text-align: left">- **技術研發成本**：包括區塊鏈系統開發、智能合約編寫、測試等方面的人力、物力投入，以及相關技術設備和軟件工具的採購費用。<br> - **運營成本**：涉及服務器維護、網絡帶寬租賃、節點運營等方面的費用，以保障系統的日常穩定運行。<br> - **市場推廣成本**：用於宣傳推廣該系統，提高其知名度和影響力，吸引更多用戶參與，包括廣告投放、參加行業展會、舉辦推廣活動等方面的費用。</div> |
 
+## 5. What makes this system superior, or better than current alternatives, or competitors?
 - 提供退款保障確保消費者權益，可避免出現如 <a href="#cama" style="display:inline;color:var(--hmd-tw-text-default);">Reference 1</a> 的消費爭議，導致私有資產蒙受損失
 - 目前密碼貨幣大多是用在純金融交易上，藉由加入能夠交易實體資源的操作，可以讓區塊鏈變成一套更能融入人類生活的制度
 - 從實體資源層次處理經濟問題，相比於純粹的貨幣政策來說，更能達到預期的功效
 - 比起單純為了謀求個人資產增值的密碼貨幣體系，本系統因具有穩定經濟、社會等效用，具有與政府談判的籌碼
 
-## 5. Expected outcomes
-
+## 6. Expected outcomes
 - 透過活化被過度囤積的實體貨幣並賦予虛擬幣交易特性等操作，增加實體資源的交易效率，進而改善經濟環境
 - 藉由區塊鏈保障私有資產和提供一個相對自由競爭的市場，將有機會使得財富分配能夠被後繼有能者參與，減緩財富分配不均導致的政治及社會問題
+
+## 7. Problems and notes
+### (1) 如何設計適當的經濟模型與匯率?
+參考 <a href="#enc-model" style="display:inline;color:var(--hmd-tw-text-default);">Reference 3</a> 中的第二部分、第四部份及第八部分。
+- 系統內實行以 VFlow coin 為黃金，contract coins 為各類不同貨幣的金本位制度，目的是確保不同的 contract coins 間的匯率，能由<a href="https://zh.wikipedia.org/zh-tw/%E8%B4%AD%E4%B9%B0%E5%8A%9B%E5%B9%B3%E4%BB%B7">購買力平價</a>機制計算。因為系統容許生產者透過建立自主的 contract coin 來滿足特定的操作(如商業模式、制定彈性價格區間等)，但消費行為通常是局域性的，表示一項商品的供給價格應該要落在一個以需求價格為平均值的區間內，所以我們需要一個穩定的基礎貨幣作為快速衡量的標準，幫助消費者及生產者做成本和調整價格的評估。
+- 研究指出，成功促成區塊鏈系統和實體經濟的關聯，與如何有效控制虛擬幣的稀缺性和流通性有關，參考資料中建議成立基金會、聘請專業人士管理，和使用公開市場操作來做定期調控。
+- 因為我們在設計上，統一使用質押 VFlow coin 來作為權益保障，某種程度上會降低流通性。除此之外，透過資金籌措的智能合約，如籌募天使投資基金(contract token 是天使投資)或虛擬幣銷毀基金(為保持稀缺性以確保個人資產價值)也能降低流通性，而這些都是基於自身利益的自主行為。但是，黃金的例子也告訴我們，流通性不足將限制經濟發展的速度，如何取得有效平衡將是一大課題。
+
+### (2) 如何記錄智能合約購買者白名單?
+- 可以參考以太坊，使用 Patricia Trie 記錄購買者名單，如經 Hash 過後的 public key 或 wallet id，以便之後確認身分。
+- 因為以太坊要維持狀態的一致性，採用 single tasking，讓名單跟著合約帳戶的狀態一起被維護和保存(?，待 7.(3) 實作確認)；而 Ourchain 採用 multitasking，雖然可以提供較佳的 scalability，但合約資料的同步上可能需要藉由其他技術達成，如 IPFS 等。
+
+### (3) 如何進行實作? 
+#### Note:
+參考 <a href="#blkchain-tech" style="display:inline;color:var(--hmd-tw-text-default);">Reference 4</a>
+- 把 transaction 看成多個 instructions 組成的 script，所以不管是操作一般轉帳或合約，都是送出一個 transaction
+- 定義並實作 API 的 inputs 跟 outputs
+- UTXO(Unspent Transaction Output)描述各自獨立的資產；account 描述狀態(state)，狀態可以包含除了資產外的其他資訊，如以太坊的合約帳戶可以擁有記錄在全網的 storage
+
+#### Test:
+參考 <a href="#sol-103" style="display:inline;color:var(--hmd-tw-text-default);">Reference 5</a>
+- 先透過 ERC20、ERC1155 及 ERC4626，實作授權、代幣鎖、時間鎖和代理合約等功能，看 inputs 跟 outputs 如何設計，和區塊鏈上的資料如何變化
 
 ## References
 <a id="cama" href="https://www.ctwant.com/article/365562/" target="_blank"><span>1. cama加盟店推「咖啡寄杯優惠」半個月後突歇業！他剩362杯求償無門</span></a><br>
 <a id="nobel-enc-2024" href="https://global.udn.com/global_vision/story/8663/8292959"><span>2. 國家為何失敗？世界為何不平等？2024諾貝爾經濟學獎的當代啟示</span></a><br>
-<a href="https://www.books.com.tw/products/E050031639?sloc=main" target="_blank"><span>3. 實戰區塊鏈技術｜加密貨幣與密碼學, 王毅丞, 碁峰, 2021</span></a><br>
-<a href="https://www.books.com.tw/products/0010803367?sloc=main" target="_blank"><span>4. 白話區塊鏈, 蔣勇, 碁峰 2018</span></a><br>
-<a href="https://www.books.com.tw/products/CN11399011?sloc=main" target="_blank"><span>5. 區塊鏈技術指南, 鄒均, 機械工業, 2016</span></a>
+<a id="enc-model" href="https://buidlerdao.notion.site/0c1c683e29af48c0a3134fbea9ded822"><span>3. 区块链经济模型</span></a><br>
+<a id="blkchain-tech" href="https://tomni.notion.site/Buidler-DAO-89472b07caff4a5b9807d1e54117181f" target="_blank"><span>4. Buidler DAO区块链底层技术系列课程    - -图灵完备与以太坊</span></a><br>
+<a id="sol-103" href="https://www.wtf.academy/docs/solidity-103" target="_blank"><span>5. Solidity 103 应用</span></a><br>
+<a href="https://www.youtube.com/watch?v=fpA2yxLKU5o&list=PLHmOMPRfmOxQYDnXAc1hKY6ra4WDU8ZlM" target="_blank"><span>6. 在 2022 年，我們該如何寫智能合約</span></a><br>
+<a href="https://www.books.com.tw/products/E050031639?sloc=main" target="_blank"><span>7. 實戰區塊鏈技術｜加密貨幣與密碼學, 王毅丞, 碁峰, 2021</span></a><br>
+<a href="https://www.books.com.tw/products/0010803367?sloc=main" target="_blank"><span>8. 白話區塊鏈, 蔣勇, 碁峰 2018</span></a><br>
+<a href="https://www.books.com.tw/products/CN11399011?sloc=main" target="_blank"><span>9. 區塊鏈技術指南, 鄒均, 機械工業, 2016</span></a>
