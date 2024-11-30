@@ -106,7 +106,7 @@ typedef struct _consignment_order{
 } ConsignmentOrder;
 ```
 
-###  <span id="sec3-3">(3) 發行合約幣(contract coin)的智能合約</span>
+###  <span id="sec3-3">(3) 發行合約幣(contract coin)的智能合約【智能合約A】</span>
 - 發行者(creator)必須要質押一定量的 VFlow coin 才能發行 contract coin，並於合約到期後才能領出
 - 發行者得自訂 VFlow coin 與 contract coin 的交換匯率(exchange rate)，但其宣稱的公開資訊與交換匯率，將會是購買者是否信任該合約的評估依據
 - 合約運作期間，購買者可透過退款(refund)取回資金保障權益
@@ -240,7 +240,7 @@ void extend(OwnerInfo creator, int new_add_period);
 void close(OwnerInfo creator);
 ```
 
-###  <span id="sec3-4">(4) 發行商品/服務兌換券(contract token)的智能合約</span>
+###  <span id="sec3-4">(4) 發行商品/服務兌換券(contract token)的智能合約【智能合約B】</span>
 - 發行者(creator)必須要質押一定量的 VFlow coin 才能發行 contract token，並於合約到期後才能領出
 - 發行者得自訂質押 VFlow coin 的數量，但該數量會與退款成本直接相關
 - 合約運作期間，消費者可使用合約指定的虛擬幣，如 VFlow coin 或 contract coin 購買 contract token，並可透過退款(refund)取回資金保障權益
@@ -459,7 +459,7 @@ void extend(OwnerInfo creator, int new_add_period);
 void close(OwnerInfo creator);
 ```
 
-###  <span id="sec3-5">(5) 交換兌換券的智能合約</span>
+###  <span id="sec3-5">(5) 交換兌換券的智能合約【智能合約C】</span>
 - 各種 token 的持有者都能透過寄賣池(consignment pool)，交易 token
 - 透過交易彼此手上以較低成本(與購買數量有關)入手的 token，讓眾人都能享受到優惠的價格
 - 節點經手的寄賣(consign)和搓合(matching)的交易，若最終得到確認上鏈，皆可以根據 <a href="#rate_def" style="display:inline;color:var(--hmd-tw-text-default);">「3.(1) 交易類型與收益」</a> 的定義，獲得 VFlow coin 作為報酬
@@ -587,7 +587,7 @@ void cancel(OwnerInfo node);
 void withdraw(OwnerInfo node);
 ```
 
-###  <span id="sec3-6">(6) 資金籌措的智能合約</span>
+###  <span id="sec3-6">(6) 資金籌措的智能合約【智能合約D】</span>
 - 使用者可以透過此智能合約進行專案籌資(fundraise/invest)，營運 contract token 的商品/服務
 - 參與本區塊鏈的初期開發團隊可透過結合 (4) 及 (6) 兩種智能合約，開啟募資並提供系統更新、技術及法規諮詢、客製化開發及系統架設等服務，從 <a href="#sec2" style="display:inline;color:var(--hmd-tw-text-default);">「2. Target audience」</a> 所定義的對象處取得對應的收益
 ```c++=
@@ -673,6 +673,10 @@ void invest(OwnerInfo supporter, int investment_unit);
 */
 void exit(OwnerInfo investor, string transaction_list[]);
 ```
+
+### (7) 不同種類的幣之間的轉換與交換
+![不同種類的幣之間的轉換與交換-min](https://hackmd.io/_uploads/ByjPDndQ1e.png)
+
 
 ## 4. Business model (商業模型)
 | 關鍵要素 | 詳情 |
