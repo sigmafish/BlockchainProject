@@ -190,7 +190,7 @@ void refund(OwnerInfo buyer, float contract_coin_amount);
 */
 void increase(OwnerInfo creator, float contract_coin_amount);
 
-/* 投資: 回補 contract coin, 配合線下簽訂的具商業機密的實體合約使用
+/* 回補: 回補 contract coin, 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) supporter.address 中是否有足夠的 contract coin 
@@ -200,7 +200,7 @@ void increase(OwnerInfo creator, float contract_coin_amount);
      - OwnerInfo supporter: supporter 的個人資訊
      - float contract_coin_amount: supporter 預計投資的 contract coin 的數量
 */
-void invest(OwnerInfo supporter, float contract_coin_amount);
+void remit(OwnerInfo supporter, float contract_coin_amount);
 
 /* 取得合約狀態:
    Outputs: (JSON string){
@@ -258,6 +258,15 @@ string deposit_address;  // 質押 VFlow coin 的 address
 string token_name;       // contract token 的名稱
 /* currency_price_maps 為不同 currency 的購買數量與單價的對應表, 
 ex. 以不同 currency 購買 1/5/10 個 contract token 對應的單價(理論上買越多越便宜)
+說明：
+ {
+    {"VFC" 或 "合約幣"，{ Exchange rate to VFC, 
+        { { 購買數量1， 單價（Unit：“VFC” 或 “合約貨幣”） }, 
+        { { 購買數量2， 單價（Unit：“VFC” 或 “合約貨幣”） },
+        { ...， ... }, ...
+    }
+ }
+ ---
  { 
     {"VFlow", { 1., { {1, 1.},{5, 1.},{10, 0.8} } } },   //用 VFlow coin
     {"ACoin", { 0.9, { {1, 0.9},{5, 0.8},{10, 0.7} } } } //用 ACoin 
@@ -354,7 +363,7 @@ void consume(OwnerInfo consumer, OwnerInfo producer, TokenInfo token_info);
        (4) 若非募資合約, 則為 true ; 若為募資合約, 檢查 transaction 記錄的 
            end_date 是否大於 today
     2. 當 1.(1) & 1.(2) & 1.(3) & 1.(4) 為 true 時, 根據 transaction_list 取得每筆交易的 
-       token_info 及購買單價, 從單價高的開始計算退款, 直到退貨數 = min{amount, buyer.address 中 token 數量} 為止  
+       token_info 及購買單價。先sort完transaction_list之後，從單價高的開始計算退款, 直到退貨數 = min{amount, buyer.address 中 token 數量} 為止  
     3. 計算 max_refund := currency_price_maps["VFlow"].amount_price_map[1] * 退貨數
     4. 轉換資產所有權, 即 buyer.address 取得 VFlow coin(總退款值 * refund_rate), 
        deposit_address 取得對應的 contract token, creator_address 取得 
@@ -383,7 +392,7 @@ void refund(OwnerInfo buyer, string transaction_list[], int amount);
 */
 void increase(OwnerInfo creator, int contract_token_amount);
 
-/* 投資: 回補 contract token, 配合線下簽訂的具商業機密的實體合約使用
+/* 回補: 回補 contract token, 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
        (1) 執行 is_contract_available()
        (2) supporter.address 中是否有足夠的 contract token 
@@ -393,7 +402,7 @@ void increase(OwnerInfo creator, int contract_token_amount);
      - OwnerInfo supporter: supporter 的個人資訊
      - int contract_token_amount: supporter 預計投資的 contract token 的數量
 */
-void invest(OwnerInfo supporter, int contract_token_amount);
+void remit(OwnerInfo supporter, int contract_token_amount);
 
 /* 加盟: 等同於新增一種支付方式, 配合線下簽訂的具商業機密的實體合約使用
     1. 檢查: 
@@ -630,7 +639,7 @@ void constructor(OwnerInfo creator, string token_transaction_id, float _basic_in
      - OwnerInfo supporter: supporter 的個人資訊
      - int investment_unit: supporter 預計投資單位數
 */
-void fundraise(OwnerInfo supporter, int investment_unit);
+void fund(OwnerInfo supporter, int investment_unit);
 
 /* 投資: 以 return rate 作為回報
     1. 計算投資額(investment_amount) := investment_unit * basic_investment_amount
@@ -701,14 +710,16 @@ void exit(OwnerInfo investor, string transaction_list[]);
 
 ### (3) 如何進行實作? 
 #### Note:
-參考 <a href="#blkchain-tech" style="display:inline;color:var(--hmd-tw-text-default);">Reference 4</a>
+參考 <a href="#blkchain-tech" style="display:inline;color:var(--hmd-tw-text-default);">Reference 4~5</a>
 - 把 transaction 看成多個 instructions 組成的 script，所以不管是操作一般轉帳或合約，都是送出一個 transaction
 - 定義並實作 API 的 inputs 跟 outputs
 - UTXO(Unspent Transaction Output)描述各自獨立的資產；account 描述狀態(state)，狀態可以包含除了資產外的其他資訊，如以太坊的合約帳戶可以擁有記錄在全網的 storage
-
 #### Test:
-參考 <a href="#sol-103" style="display:inline;color:var(--hmd-tw-text-default);">Reference 5</a>
+參考 <a href="#sol-tech" style="display:inline;color:var(--hmd-tw-text-default);">Reference 6~7</a>
 - 先透過 ERC20、ERC1155 及 ERC4626，實作授權、代幣鎖、時間鎖和代理合約等功能，看 inputs 跟 outputs 如何設計，和區塊鏈上的資料如何變化
+
+### （4）Contract No. 6: To support paying back dividend in the future?
+Right now, Contract 6 supports proactive calls from investors to exit from an investment. However, for long-term investors, it may not be sufficient, as they expect dividends during the time they hold the investment. So, we may need to support a function for the `creator` or `investee` to call to pay dividends to investors.
 
 ## References
 <a id="cama" href="https://www.ctwant.com/article/365562/" target="_blank">1. cama加盟店推「咖啡寄杯優惠」半個月後突歇業！他剩362杯求償無門</a><br>
@@ -717,9 +728,10 @@ void exit(OwnerInfo investor, string transaction_list[]);
 <a href="https://zh.m.wikipedia.org/zh-tw/%E5%AE%8B%E6%9C%9D#%E7%B6%93%E6%BF%9F">&emsp;&nbsp;(2) 宋朝的經濟政策</a><br>
 <a href="https://zh.m.wikipedia.org/zh-tw/%E7%B9%94%E7%94%B0%E4%BF%A1%E9%95%B7#%E5%95%86%E6%A5%AD%E6%94%BF%E7%AD%96">&emsp;&nbsp;(3) 織田信長的商業政策</a><br>
 <a id="enc-model" href="https://buidlerdao.notion.site/0c1c683e29af48c0a3134fbea9ded822">3. 区块链经济模型</a><br>
-<a id="blkchain-tech" href="https://tomni.notion.site/Buidler-DAO-89472b07caff4a5b9807d1e54117181f" target="_blank">4. Buidler DAO区块链底层技术系列课程    - -图灵完备与以太坊</a><br>
-<a id="sol-103" href="https://www.wtf.academy/docs/solidity-103" target="_blank">5. Solidity 103 应用</a><br>
-<a href="https://www.youtube.com/watch?v=fpA2yxLKU5o&list=PLHmOMPRfmOxQYDnXAc1hKY6ra4WDU8ZlM" target="_blank">6. 在 2022 年，我們該如何寫智能合約</a><br>
-<a href="https://www.books.com.tw/products/E050031639?sloc=main" target="_blank">7. 實戰區塊鏈技術｜加密貨幣與密碼學, 王毅丞, 碁峰, 2021</a><br>
-<a href="https://www.books.com.tw/products/0010803367?sloc=main" target="_blank">8. 白話區塊鏈, 蔣勇, 碁峰 2018</a><br>
-<a href="https://www.books.com.tw/products/CN11399011?sloc=main" target="_blank">9. 區塊鏈技術指南, 鄒均, 機械工業, 2016</a>
+<a id="blkchain-tech" href="https://en.bitcoin.it/wiki/Script#Standard_Transaction_to_Bitcoin_address_(pay-to-pubkey-hash)" target="_blank">4. Standard Transaction to Bitcoin address</a><br>
+<a href="https://tomni.notion.site/Buidler-DAO-89472b07caff4a5b9807d1e54117181f" target="_blank">5. Buidler DAO区块链底层技术系列课程    - -图灵完备与以太坊</a><br>
+<a id="#sol-tech" href="https://www.wtf.academy/docs/solidity-103" target="_blank">6. Solidity 103 应用</a><br>
+<a href="https://www.youtube.com/watch?v=fpA2yxLKU5o&list=PLHmOMPRfmOxQYDnXAc1hKY6ra4WDU8ZlM" target="_blank">7. 在 2022 年，我們該如何寫智能合約</a><br>
+<a href="https://www.books.com.tw/products/E050031639?sloc=main" target="_blank">8. 實戰區塊鏈技術｜加密貨幣與密碼學, 王毅丞, 碁峰, 2021</a><br>
+<a href="https://www.books.com.tw/products/0010803367?sloc=main" target="_blank">9. 白話區塊鏈, 蔣勇, 碁峰 2018</a><br>
+<a href="https://www.books.com.tw/products/CN11399011?sloc=main" target="_blank">10. 區塊鏈技術指南, 鄒均, 機械工業, 2016</a>
