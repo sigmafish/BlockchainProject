@@ -4,6 +4,8 @@
 R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李駿傑、R12521616 陳俊達
 
 ---
+<a href="https://docs.google.com/presentation/d/13GOQH7FGl2EIsEb6KN8DiyJmwuLhcxO-Xpqt-i-V7S0/edit#slide=id.p1" target="_blank">簡報投影片</a>
+---
   
 ## 1. Introduction
 
@@ -21,7 +23,7 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 術 -- 賽局設計與期貨思維<br>
 器 -- 區塊鏈及相關技術**
 
-## 2.  <span id="sec2">Target audience</span>
+## 2. <span id="sec2">Target audience</span>
 以下是可從本區塊鏈提供的操作中，獲取利益的對象:
 
 | 對象               | 操作 | 預期利益 |
@@ -722,8 +724,8 @@ void exit(OwnerInfo investor, string transaction_list[]);
 參考 <a href="#sol-tech" style="display:inline;color:var(--hmd-tw-text-default);">Reference 6~7</a>
 - 先透過 ERC20、ERC1155 及 ERC4626，實作授權、代幣鎖、時間鎖和代理合約等功能，看 inputs 跟 outputs 如何設計，和區塊鏈上的資料如何變化
 
-### （4）Contract No. 6: To support paying back dividend in the future?
-Right now, Contract 6 supports proactive calls from investors to exit from an investment. However, for long-term investors, it may not be sufficient, as they expect dividends during the time they hold the investment. So, we may need to support a function for the `creator` or `investee` to call to pay dividends to investors.
+### (4) Contract D: To support paying back dividend in the future?
+Right now, Contract D supports proactive calls from investors to exit from an investment. However, for long-term investors, it may not be sufficient, as they expect dividends during the time they hold the investment. So, we may need to support a function for the `creator` or `investee` to call to pay dividends to investors.
 
 ## References
 <a id="cama" href="https://www.ctwant.com/article/365562/" target="_blank">1. cama加盟店推「咖啡寄杯優惠」半個月後突歇業！他剩362杯求償無門</a><br>
