@@ -13,7 +13,7 @@ R13922176 張智奇、P13922007 王信璋、P12922003 陳建宏、T13902113 李�
 
 從穩定幣或其他虛擬貨幣的經驗看來，需求方要的是一個能保障資產或令資產增長的系統，實際上就是一個風險趨避的行為，而供給方藉由背景或財力提供保障/安全感，並將所承擔的風險轉移到實體貨幣的投資中，這樣的供需結構如同期貨，雙方藉由交換資產各取所需，但目前虛擬幣的價值也僅止於多種貨幣間交換的媒介，功能上離真正的貨幣仍有一段距離。
 
-我們希望透過期貨思維設計商業模型，賦予虛擬幣在實體經濟中的交易特性，提供需求方確保其購買力效益(安全感)，也讓供給方能有利可圖，如需求估計(成本控制)、購買力(資源)競爭、獲得投資本金等，也希望在模型運行的過程中，活化被過度囤積的實體貨幣，並讓市場在系統設計的規則(PoW 和智能合約)中趨於自由競爭。從 <a href="#econ-policy" style="display:inline;color:var(--hmd-tw-text-default);">Reference 2</a> 的研究和實證中，我們發現這樣的市場環境(政治不一定要選用民主制度)，較有利於經濟與社會的發展。
+我們希望透過期貨思維設計商業模型，賦予虛擬幣在實體經濟中的交易特性，提供需求方確保其購買力效益(安全感)，也讓供給方能有利可圖，如需求估計(成本控制)、購買力(資源)競爭、獲得投資本金等，也希望在模型運行的過程中，活化被過度囤積的實體貨幣，並讓市場在系統設計的規則(PoW 和智能合約)中趨於自由競爭。從 <a href="#econ-policy" style="display:inline;color:var(--hmd-tw-text-default);">Reference 1</a> 的研究和實證中，我們發現這樣的市場環境(政治不一定要選用民主制度)，較有利於經濟與社會的發展。
 
 為此，我們期望藉由區塊鏈建立一個可信的私有資產所有權交易系統，記錄包括個人擁有的虛擬貨幣及未兌現商品/服務的契約，本系統目的是活絡實體資源交易，為了讓市場活絡需要多人參與協作(拿出資本加入市場)更新交易的資訊，而其中的開放資料也可為政府政策所用，如稅收的評估依據、政策的研擬等，細部觀察與論述見 <a href="#7-Problems-and-notes" style="display:inline;color:var(--hmd-tw-text-default);"> 7.(1) </a>。
 
@@ -694,7 +694,7 @@ void exit(OwnerInfo investor, string transaction_list[]);
 | **成本結構** | <div style="text-align: left">- **技術研發成本**：包括區塊鏈系統開發、智能合約編寫、測試等方面的人力、物力投入，以及相關技術設備和軟件工具的採購費用。<br> - **運營成本**：涉及服務器維護、網絡帶寬租賃、節點運營等方面的費用，以保障系統的日常穩定運行。<br> - **市場推廣成本**：用於宣傳推廣該系統，提高其知名度和影響力，吸引更多用戶參與，包括廣告投放、參加行業展會、舉辦推廣活動等方面的費用。</div> |
 
 ## 5. What makes this system superior, or better than current alternatives, or competitors?
-- 提供退款保障確保消費者權益，可避免出現如 <a href="#cama" style="display:inline;color:var(--hmd-tw-text-default);">Reference 1</a> 的消費爭議，導致私有資產蒙受損失
+- 提供退款保障確保消費者權益，可避免出現如 <a href="#cama" style="display:inline;color:var(--hmd-tw-text-default);">Reference 2</a> 的消費爭議，導致私有資產蒙受損失
 - 目前密碼貨幣大多是用在純金融交易上，藉由加入能夠交易實體資源的操作，可以讓區塊鏈變成一套更能融入人類生活的制度
 - 從實體資源層次處理經濟問題，相比於純粹的貨幣政策來說，更能達到預期的功效
 - 比起單純為了謀求個人資產增值的密碼貨幣體系，本系統因具有穩定經濟、社會等效用，具有與政府談判的籌碼
@@ -751,11 +751,11 @@ void exit(OwnerInfo investor, string transaction_list[]);
 Right now, Contract D supports proactive calls from investors to exit from an investment. However, for long-term investors, it may not be sufficient, as they expect dividends during the time they hold the investment. So, we may need to support a function for the `creator` or `investee` to call to pay dividends to investors.
 
 ## References
-<a id="cama" href="https://www.ctwant.com/article/365562/" target="_blank">1. cama加盟店推「咖啡寄杯優惠」半個月後突歇業！他剩362杯求償無門</a><br>
-<a id="econ-policy" href="#econ-policy">2. 關於私有資產保護與自由競爭制度，對經濟環境影響的研究和實證</a><br>
+<a id="econ-policy" href="#econ-policy">1. 關於私有資產保護與自由競爭制度，對經濟環境影響的研究和實證</a><br>
 <a href="https://global.udn.com/global_vision/story/8663/8292959">&emsp;&nbsp;(1) 國家為何失敗？世界為何不平等？2024諾貝爾經濟學獎的當代啟示</a><br>
 <a href="https://zh.m.wikipedia.org/zh-tw/%E5%AE%8B%E6%9C%9D#%E7%B6%93%E6%BF%9F">&emsp;&nbsp;(2) 宋朝的經濟政策</a><br>
 <a href="https://zh.m.wikipedia.org/zh-tw/%E7%B9%94%E7%94%B0%E4%BF%A1%E9%95%B7#%E5%95%86%E6%A5%AD%E6%94%BF%E7%AD%96">&emsp;&nbsp;(3) 織田信長的商業政策</a><br>
+<a id="cama" href="https://news.tvbs.com.tw/life/2631882" target="_blank">2. 我的咖啡勒！寄杯「剩362杯」　加盟店8月推買百送百半月後歇業</a><br>
 <a id="enc-model" href="https://buidlerdao.notion.site/0c1c683e29af48c0a3134fbea9ded822">3. 区块链经济模型</a><br>
 <a id="blkchain-tech" href="https://en.bitcoin.it/wiki/Script#Standard_Transaction_to_Bitcoin_address_(pay-to-pubkey-hash)" target="_blank">4. Standard Transaction to Bitcoin address</a><br>
 <a href="https://tomni.notion.site/Buidler-DAO-89472b07caff4a5b9807d1e54117181f" target="_blank">5. Buidler DAO区块链底层技术系列课程    - -图灵完备与以太坊</a><br>
